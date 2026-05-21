@@ -1,853 +1,872 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Física do Foguete de PET</title>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador de Foguete PET</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      background: linear-gradient(135deg, #020617, #1e3a8a, #0284c7);
-      color: #1e293b;
-      padding: 20px;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #0b1020, #123b8f, #0ea5e9);
+      color: #0f172a;
     }
-
-    .container {
-      max-width: 1180px;
-      margin: auto;
-      background: #f8fafc;
-      border-radius: 24px;
-      padding: 30px;
-      box-shadow: 0 25px 55px rgba(0, 0, 0, 0.35);
+    .wrap {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 18px;
     }
-
-    header {
-      text-align: center;
-      padding: 28px;
-      border-radius: 20px;
+    .topo {
       background: linear-gradient(135deg, #2563eb, #38bdf8);
       color: white;
-      margin-bottom: 25px;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 14px 30px rgba(0,0,0,0.25);
+      margin-bottom: 18px;
     }
-
-    header h1 {
-      font-size: 36px;
-      margin-bottom: 10px;
+    .topo h1 {
+      margin: 0 0 8px 0;
+      font-size: 34px;
     }
-
-    header p {
+    .topo p {
+      margin: 0;
       font-size: 18px;
       line-height: 1.5;
     }
-
-    .badge {
-      display: inline-block;
-      margin-top: 14px;
-      padding: 8px 15px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.22);
-      font-weight: bold;
-      border: 1px solid rgba(255, 255, 255, 0.45);
-    }
-
-    .rocket-area {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 280px;
-      background: radial-gradient(circle, #dbeafe, #eff6ff);
-      border-radius: 20px;
-      margin-bottom: 25px;
-      position: relative;
-      overflow: hidden;
-      border: 2px dashed #93c5fd;
-    }
-
-    .linha-altura {
-      position: absolute;
-      right: 42px;
-      top: 30px;
-      bottom: 30px;
-      width: 4px;
-      background: #1d4ed8;
-      border-radius: 10px;
-    }
-
-    .linha-altura::before {
-      content: "Altura";
-      position: absolute;
-      right: 12px;
-      top: 45%;
-      background: #1d4ed8;
-      color: white;
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .linha-distancia {
-      position: absolute;
-      left: 80px;
-      right: 80px;
-      bottom: 28px;
-      height: 4px;
-      background: #16a34a;
-      border-radius: 10px;
-    }
-
-    .linha-distancia::before {
-      content: "Distância horizontal";
-      position: absolute;
-      left: 38%;
-      bottom: 12px;
-      background: #16a34a;
-      color: white;
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .rocket {
-      width: 90px;
-      height: 180px;
-      background: linear-gradient(#60a5fa, #2563eb);
-      border-radius: 50% 50% 12px 12px;
-      position: relative;
-      animation: subir 2s infinite alternate ease-in-out;
-      z-index: 2;
-      box-shadow: 0 15px 25px rgba(37, 99, 235, 0.35);
-    }
-
-    .rocket::before {
-      content: "";
-      position: absolute;
-      top: 35px;
-      left: 25px;
-      width: 40px;
-      height: 40px;
-      background: #bfdbfe;
-      border-radius: 50%;
-      border: 4px solid white;
-    }
-
-    .rocket::after {
-      content: "";
-      position: absolute;
-      bottom: -58px;
-      left: 22px;
-      width: 45px;
-      height: 75px;
-      background: linear-gradient(#f97316, #facc15, transparent);
-      border-radius: 50%;
-      animation: fogo 0.28s infinite alternate;
-    }
-
-    .asa-esq, .asa-dir {
-      position: absolute;
-      bottom: 10px;
-      width: 35px;
-      height: 60px;
-      background: #ef4444;
-    }
-
-    .asa-esq {
-      left: -30px;
-      border-radius: 20px 0 0 20px;
-    }
-
-    .asa-dir {
-      right: -30px;
-      border-radius: 0 20px 20px 0;
-    }
-
-    @keyframes subir {
-      from { transform: translateY(28px); }
-      to { transform: translateY(-28px); }
-    }
-
-    @keyframes fogo {
-      from { transform: scaleY(0.8); opacity: 0.75; }
-      to { transform: scaleY(1.25); opacity: 1; }
-    }
-
-    .grid {
+    .layout {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-      margin-bottom: 25px;
+      grid-template-columns: 390px 1fr;
+      gap: 18px;
+      align-items: start;
     }
-
-    .card {
-      background: white;
-      border-radius: 18px;
-      padding: 22px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
-      border-left: 7px solid #2563eb;
-      margin-bottom: 20px;
-    }
-
-    .card h2 {
-      color: #1d4ed8;
-      margin-bottom: 12px;
-      font-size: 23px;
-    }
-
-    .card p {
-      line-height: 1.6;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-
-    .formula {
-      background: #e0f2fe;
-      color: #075985;
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 21px;
-      font-weight: bold;
-      text-align: center;
-      margin: 12px 0;
-      border: 1px solid #7dd3fc;
-    }
-
-    .calculadora {
-      background: #ffffff;
-      padding: 25px;
+    .painel, .simulacao, .bloco {
+      background: #f8fafc;
       border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
-      margin-bottom: 25px;
-      border-top: 8px solid #0ea5e9;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
     }
-
-    .calculadora h2 {
+    .painel {
+      padding: 20px;
+      position: sticky;
+      top: 18px;
+    }
+    .painel h2, .simulacao h2, .bloco h2 {
+      margin: 0 0 14px 0;
       color: #1d4ed8;
-      margin-bottom: 8px;
-      text-align: center;
+      font-size: 24px;
     }
-
-    .calculadora .subtitulo {
-      text-align: center;
+    .sub {
+      margin: 0 0 16px 0;
       color: #475569;
-      margin-bottom: 20px;
-      font-weight: bold;
       line-height: 1.5;
+      font-weight: bold;
     }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
+    .grupo {
+      margin-bottom: 14px;
     }
-
     label {
+      display: block;
       font-weight: bold;
       color: #334155;
-      display: block;
       margin-bottom: 6px;
     }
-
-    input {
+    input[type="number"], input[type="text"] {
       width: 100%;
       padding: 12px;
-      border-radius: 12px;
       border: 2px solid #cbd5e1;
+      border-radius: 12px;
       font-size: 16px;
-      background: #f8fafc;
+      background: #fff;
     }
-
-    input:focus {
-      outline: none;
-      border-color: #2563eb;
-      background: #ffffff;
-    }
-
     input[readonly] {
       background: #e2e8f0;
-      color: #334155;
-      cursor: not-allowed;
       font-weight: bold;
     }
-
-    .campo-principal input {
-      border-color: #16a34a;
-      background: #f0fdf4;
-      font-weight: bold;
-      font-size: 18px;
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
-
     .botoes {
       display: flex;
-      gap: 12px;
-      justify-content: center;
+      gap: 10px;
       flex-wrap: wrap;
-      margin-top: 10px;
+      margin-top: 16px;
+      margin-bottom: 14px;
     }
-
     button {
-      background: #2563eb;
-      color: white;
       border: none;
-      padding: 14px 22px;
       border-radius: 12px;
+      padding: 13px 18px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      transition: 0.2s;
+      transition: .2s;
     }
-
-    button:hover {
-      background: #1d4ed8;
-      transform: translateY(-2px);
-    }
-
-    .btn-verde { background: #16a34a; }
-    .btn-verde:hover { background: #15803d; }
-    .btn-cinza { background: #475569; }
-    .btn-cinza:hover { background: #334155; }
-
+    button:hover { transform: translateY(-2px); }
+    .btn-azul { background: #2563eb; color: white; }
+    .btn-verde { background: #16a34a; color: white; }
+    .btn-cinza { background: #475569; color: white; }
+    .btn-laranja { background: #ea580c; color: white; }
     .resultado {
       background: #dcfce7;
       border-left: 7px solid #16a34a;
-      padding: 20px;
       border-radius: 16px;
-      margin-top: 22px;
+      padding: 16px;
+      margin-top: 10px;
     }
-
-    .resultado h3 {
-      color: #166534;
-      margin-bottom: 10px;
-    }
-
     .resultado p {
-      font-size: 17px;
-      margin: 8px 0;
-      line-height: 1.5;
+      margin: 6px 0;
+      font-size: 16px;
+      line-height: 1.45;
     }
-
-    .resultado-grid {
+    .simulacao {
+      padding: 18px;
+    }
+    .canvas-box {
+      background: linear-gradient(#cfe9ff 0%, #dbeafe 55%, #bbf7d0 56%, #86efac 100%);
+      border-radius: 18px;
+      overflow: hidden;
+      border: 2px solid #93c5fd;
+      position: relative;
+    }
+    canvas {
+      width: 100%;
+      height: 620px;
+      display: block;
+    }
+    .legenda {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 12px;
       margin-top: 14px;
     }
-
-    .mini-resultado {
-      background: white;
-      padding: 14px;
+    .item-legenda {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
       border-radius: 12px;
-      border: 1px solid #bbf7d0;
+      padding: 10px;
       text-align: center;
+      font-weight: bold;
+      color: #1e3a8a;
     }
-
-    .mini-resultado strong {
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #dbeafe;
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .card strong {
       display: block;
       color: #166534;
       margin-bottom: 6px;
+      font-size: 15px;
     }
-
-    .mini-resultado span {
-      font-size: 22px;
-      font-weight: bold;
+    .card span {
       color: #0f172a;
+      font-size: 23px;
+      font-weight: bold;
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 14px;
-      overflow: hidden;
-      margin-top: 16px;
-      box-shadow: 0 5px 14px rgba(15, 23, 42, 0.08);
+    .blocos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
     }
-
-    th {
-      background: #2563eb;
-      color: white;
-      padding: 14px;
+    .bloco {
+      padding: 20px;
+    }
+    .bloco p, .bloco li {
+      line-height: 1.6;
       font-size: 16px;
     }
-
-    td {
-      padding: 13px;
-      border-bottom: 1px solid #cbd5e1;
-      text-align: center;
+    .bloco ol {
+      margin: 0;
+      padding-left: 24px;
     }
-
-    tr:nth-child(even) td {
-      background: #f8fafc;
-    }
-
-    .atividade {
-      background: #fff7ed;
-      border-left-color: #f97316;
-    }
-
-    .atividade ol {
-      margin-left: 22px;
-      line-height: 1.7;
-      font-size: 16px;
-    }
-
     .alerta {
       background: #fef3c7;
       border-left: 7px solid #f59e0b;
-      padding: 18px;
-      border-radius: 16px;
-      margin-top: 25px;
-      line-height: 1.6;
     }
-
-    .observacao {
+    .obs {
       background: #e0f2fe;
       border-left: 7px solid #0284c7;
-      padding: 18px;
-      border-radius: 16px;
-      margin-top: 20px;
-      line-height: 1.6;
     }
-
-    .regra {
-      background: #f1f5f9;
-      border-left-color: #64748b;
-    }
-
-    footer {
+    .rodape {
       text-align: center;
-      margin-top: 25px;
-      padding: 18px;
-      color: #475569;
+      color: white;
+      padding: 14px;
       font-weight: bold;
     }
-
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+      .painel { position: static; }
+      .blocos { grid-template-columns: 1fr; }
+    }
     @media print {
-      body {
-        background: white;
-        padding: 0;
-      }
-
-      .container {
-        box-shadow: none;
-        border-radius: 0;
-      }
-
-      button {
-        display: none;
-      }
-
-      .rocket-area,
-      .card,
-      .calculadora {
-        page-break-inside: avoid;
-      }
+      body { background: white; }
+      .painel { position: static; }
+      .botoes { display: none; }
+      .topo, .painel, .simulacao, .bloco { box-shadow: none; }
     }
   </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <div class="topo">
+      <h1>Simulador Visual do Foguete de PET</h1>
+      <p>
+        Altere os dados do foguete e veja a <strong>simulação visual do lançamento</strong>.
+        O sistema recalcula automaticamente pressão, água, massa total, velocidade,
+        força, altura e distância.
+      </p>
+    </div>
 
-  <div class="container">
+    <div class="layout">
+      <div class="painel">
+        <h2>Dados do foguete</h2>
+        <p class="sub">Mude os valores e o foguete muda na simulação.</p>
 
-    <header>
-      <h1>Física do Foguete de Garrafa PET</h1>
-      <p>Calculadora automática por massa, pressão do ar e quantidade de água.</p>
-      <div class="badge">Modelo padrão: 1 garrafa PET de 2 litros</div>
-    </header>
+        <div class="grid2">
+          <div class="grupo">
+            <label>Massa vazia da PET (kg)</label>
+            <input type="number" id="massaVazia" value="0.15" step="0.01" min="0.05" max="1.0">
+          </div>
+          <div class="grupo">
+            <label>Volume da garrafa (L)</label>
+            <input type="number" id="volumeGarrafa" value="2.0" step="0.1" min="0.5" max="3.0">
+          </div>
 
-    <div class="rocket-area">
-      <div class="linha-altura"></div>
-      <div class="linha-distancia"></div>
+          <div class="grupo">
+            <label>Água na garrafa (%)</label>
+            <input type="number" id="aguaPercentual" value="40" step="1" min="10" max="50">
+          </div>
+          <div class="grupo">
+            <label>Pressão do ar (PSI)</label>
+            <input type="number" id="pressaoPSI" value="40" step="1" min="10" max="50">
+          </div>
 
-      <div class="rocket">
-        <div class="asa-esq"></div>
-        <div class="asa-dir"></div>
+          <div class="grupo">
+            <label>Ângulo de lançamento (°)</label>
+            <input type="number" id="angulo" value="45" step="1" min="10" max="80">
+          </div>
+          <div class="grupo">
+            <label>Duração da ejeção (s)</label>
+            <input type="number" id="tempoEjecao" value="0.55" step="0.05" min="0.2" max="1.5">
+          </div>
+
+          <div class="grupo">
+            <label>Pressão em bar</label>
+            <input type="text" id="pressaoBar" readonly>
+          </div>
+          <div class="grupo">
+            <label>Quantidade de água (L)</label>
+            <input type="text" id="aguaLitros" readonly>
+          </div>
+
+          <div class="grupo">
+            <label>Massa da água (kg)</label>
+            <input type="text" id="massaAgua" readonly>
+          </div>
+          <div class="grupo">
+            <label>Massa total inicial (kg)</label>
+            <input type="text" id="massaTotal" readonly>
+          </div>
+
+          <div class="grupo">
+            <label>Aceleração média (m/s²)</label>
+            <input type="text" id="aceleracao" readonly>
+          </div>
+          <div class="grupo">
+            <label>Velocidade inicial estimada (m/s)</label>
+            <input type="text" id="velocidade" readonly>
+          </div>
+        </div>
+
+        <div class="botoes">
+          <button class="btn-azul" id="btnSimular">Simular lançamento</button>
+          <button class="btn-verde" id="btnPadrao">Usar padrão PET</button>
+          <button class="btn-laranja" id="btnReset">Reiniciar cena</button>
+          <button class="btn-cinza" onclick="window.print()">Imprimir</button>
+        </div>
+
+        <div class="resultado" id="textoResumo"></div>
+      </div>
+
+      <div class="simulacao">
+        <h2>Simulação do lançamento</h2>
+        <p class="sub">A trajetória muda de acordo com os dados do foguete.</p>
+
+        <div class="canvas-box">
+          <canvas id="canvas" width="1100" height="620"></canvas>
+        </div>
+
+        <div class="legenda">
+          <div class="item-legenda">Azul tracejado = trajetória prevista</div>
+          <div class="item-legenda">Vermelho = trajetória real simulada</div>
+          <div class="item-legenda">Laranja = chama / exaustão</div>
+          <div class="item-legenda">Verde = solo / área de alcance</div>
+        </div>
+
+        <div class="cards">
+          <div class="card"><strong>Força média</strong><span id="cardForca">0 N</span></div>
+          <div class="card"><strong>Altura máxima</strong><span id="cardAltura">0 m</span></div>
+          <div class="card"><strong>Distância</strong><span id="cardDistancia">0 m</span></div>
+          <div class="card"><strong>Tempo de voo</strong><span id="cardTempo">0 s</span></div>
+          <div class="card"><strong>Tempo de ejeção</strong><span id="cardEjecao">0 s</span></div>
+          <div class="card"><strong>Status</strong><span id="cardStatus">Parado</span></div>
+        </div>
       </div>
     </div>
 
-    <section class="grid">
-      <div class="card">
-        <h2>3ª Lei de Newton</h2>
-        <p>O foguete sobe porque a água e o ar são empurrados para baixo. Como reação, o foguete recebe uma força para cima.</p>
-        <p><strong>Ação:</strong> água/ar saem para baixo.</p>
-        <p><strong>Reação:</strong> foguete sobe.</p>
+    <div class="blocos">
+      <div class="bloco obs">
+        <h2>Como o simulador calcula</h2>
+        <p>
+          O modelo usa uma simulação didática: primeiro existe uma fase de
+          <strong>ejeção de água com ar comprimido</strong>, em que o foguete recebe empuxo.
+          Depois ele entra na fase de <strong>movimento oblíquo</strong>, sofrendo a ação da gravidade.
+        </p>
+        <p>
+          Se a pressão aumenta, o foguete tende a sair mais rápido.
+          Se a massa total aumenta, ele tende a sair mais devagar.
+        </p>
       </div>
 
-      <div class="card">
-        <h2>Força Exercida</h2>
-        <p>A força pode ser calculada usando a 2ª Lei de Newton:</p>
-        <div class="formula">F = m × a</div>
-        <p>F = força em Newtons<br>m = massa em kg<br>a = aceleração em m/s²</p>
+      <div class="bloco alerta">
+        <h2>Segurança</h2>
+        <ol>
+          <li>Use somente garrafa PET em bom estado.</li>
+          <li>Utilize apenas ar comum e bomba com manômetro.</li>
+          <li>Não ultrapasse 50 PSI neste modelo escolar.</li>
+          <li>Mantenha distância de pessoas, carros, janelas e fios.</li>
+          <li>Faça o lançamento apenas com supervisão do professor.</li>
+        </ol>
       </div>
+    </div>
 
-      <div class="card">
-        <h2>Altura Máxima</h2>
-        <p>Para estimar a altura máxima, usamos:</p>
-        <div class="formula">H = v² ÷ 2g</div>
-        <p>H = altura<br>v = velocidade inicial<br>g = gravidade, aproximadamente 9,8 m/s²</p>
-      </div>
-
-      <div class="card">
-        <h2>Distância Horizontal</h2>
-        <p>Quando o foguete é lançado em ângulo:</p>
-        <div class="formula">D = v² × sen(2θ) ÷ g</div>
-        <p>D = distância<br>θ = ângulo de lançamento<br>v = velocidade inicial</p>
-      </div>
-    </section>
-
-    <section class="card regra">
-      <h2>Regra automática usada no simulador</h2>
-      <p>
-        O sistema usa como padrão uma garrafa PET de 2 litros com 40% de água, pressão de 40 PSI e massa vazia de 0,150 kg.
-        Se a massa total aumenta, a aceleração, velocidade e alcance diminuem. Se a pressão aumenta, os valores aumentam.
-      </p>
-
-      <table>
-        <tr>
-          <th>Dado</th>
-          <th>Valor padrão</th>
-        </tr>
-        <tr>
-          <td>Volume da garrafa</td>
-          <td>2,0 L</td>
-        </tr>
-        <tr>
-          <td>Água</td>
-          <td>40% = 0,800 L aproximadamente</td>
-        </tr>
-        <tr>
-          <td>Pressão do ar</td>
-          <td>40 PSI = 2,76 bar aproximadamente</td>
-        </tr>
-        <tr>
-          <td>Massa vazia da PET</td>
-          <td>0,150 kg</td>
-        </tr>
-        <tr>
-          <td>Massa total inicial aproximada</td>
-          <td>0,950 kg</td>
-        </tr>
-      </table>
-    </section>
-
-    <section class="calculadora">
-      <h2>Calculadora automática do Foguete de PET</h2>
-      <p class="subtitulo">
-        Altere massa, pressão, volume de água ou ângulo. O programa atualiza aceleração, velocidade, altura e distância.
-      </p>
-
-      <div class="form-grid">
-        <div class="campo-principal">
-          <label>Massa vazia da PET em kg</label>
-          <input type="number" id="massaVazia" value="0.15" step="0.01" min="0.05" max="1.5" oninput="atualizarTudo()">
-        </div>
-
-        <div>
-          <label>Volume da garrafa em litros</label>
-          <input type="number" id="volumeGarrafa" value="2" step="0.1" min="0.5" max="3" oninput="atualizarTudo()">
-        </div>
-
-        <div>
-          <label>Água dentro da garrafa (%)</label>
-          <input type="number" id="aguaPercentual" value="40" step="1" min="10" max="50" oninput="atualizarTudo()">
-        </div>
-
-        <div>
-          <label>Pressão do ar em PSI</label>
-          <input type="number" id="pressaoPSI" value="40" step="1" min="10" max="50" oninput="atualizarTudo()">
-        </div>
-
-        <div>
-          <label>Ângulo de lançamento em graus</label>
-          <input type="number" id="angulo" value="45" step="1" min="0" max="90" oninput="calcular()">
-        </div>
-
-        <div>
-          <label>Pressão em bar</label>
-          <input type="text" id="pressaoBar" value="2,76 bar" readonly>
-        </div>
-
-        <div>
-          <label>Quantidade de água em litros</label>
-          <input type="text" id="aguaLitros" value="0,800 L" readonly>
-        </div>
-
-        <div>
-          <label>Massa da água em kg</label>
-          <input type="text" id="massaAgua" value="0,800 kg" readonly>
-        </div>
-
-        <div>
-          <label>Massa total inicial em kg</label>
-          <input type="text" id="massaTotal" value="0,950 kg" readonly>
-        </div>
-
-        <div>
-          <label>Aceleração automática em m/s²</label>
-          <input type="text" id="aceleracao" value="50,00 m/s²" readonly>
-        </div>
-
-        <div>
-          <label>Velocidade automática em m/s</label>
-          <input type="text" id="velocidade" value="18,00 m/s" readonly>
-        </div>
-
-        <div>
-          <label>Tempo automático de voo em segundos</label>
-          <input type="text" id="tempo" value="3,60 s" readonly>
-        </div>
-      </div>
-
-      <div class="botoes">
-        <button onclick="calcular()">Calcular</button>
-        <button class="btn-verde" onclick="dadosPadrao()">Usar padrão PET</button>
-        <button class="btn-cinza" onclick="window.print()">Imprimir atividade</button>
-      </div>
-
-      <div class="resultado" id="resultado">
-        <h3>Resultado dos cálculos</h3>
-        <p>Os cálculos aparecerão aqui automaticamente.</p>
-      </div>
-    </section>
-
-    <section class="card atividade">
-      <h2>Atividade para os alunos</h2>
-      <ol>
-        <li>Altere a pressão para 20 PSI. O que aconteceu com a altura?</li>
-        <li>Altere a pressão para 40 PSI. Compare com o resultado anterior.</li>
-        <li>Altere a água para 30% e depois para 40%. O que mudou?</li>
-        <li>Explique por que o foguete precisa de água e ar comprimido para subir.</li>
-        <li>Explique com suas palavras a 3ª Lei de Newton no foguete de PET.</li>
-      </ol>
-    </section>
-
-    <section class="observacao">
-      <strong>Observação para o professor:</strong>
-      este é um modelo didático simplificado. Em testes reais, pressão, quantidade de água, vento,
-      ângulo, atrito com o ar, formato do foguete, bico e estabilidade mudam os resultados.
-    </section>
-
-    <section class="alerta">
-      <strong>Segurança:</strong>
-      use somente ar comum, bomba manual com manômetro e supervisão do professor.
-      Não usar gases inflamáveis, cilindros de alta pressão ou garrafas danificadas.
-      Não lançar em direção a pessoas, janelas, veículos, fios elétricos ou objetos frágeis.
-    </section>
-
-    <footer>
-      Atividade de Física — Foguete de PET | Massa, Pressão, Água, Altura e Distância
-    </footer>
-
+    <div class="rodape">
+      Simulador de Física — Foguete de PET com animação visual
+    </div>
   </div>
 
   <script>
-    const massaVaziaBase = 0.150;
-    const volumeBase = 2.0;
-    const aguaPercentualBase = 40;
-    const pressaoBasePSI = 40;
-    const aceleracaoBase = 50;
-    const velocidadeBase = 18;
-    const tempoBase = 3.6;
-    const anguloBase = 45;
-    const gravidade = 9.8;
+    const massaVaziaEl = document.getElementById('massaVazia');
+    const volumeGarrafaEl = document.getElementById('volumeGarrafa');
+    const aguaPercentualEl = document.getElementById('aguaPercentual');
+    const pressaoPSIEl = document.getElementById('pressaoPSI');
+    const anguloEl = document.getElementById('angulo');
+    const tempoEjecaoEl = document.getElementById('tempoEjecao');
 
-    function numeroBR(valor, casas = 2) {
-      return valor.toFixed(casas).replace(".", ",");
+    const pressaoBarEl = document.getElementById('pressaoBar');
+    const aguaLitrosEl = document.getElementById('aguaLitros');
+    const massaAguaEl = document.getElementById('massaAgua');
+    const massaTotalEl = document.getElementById('massaTotal');
+    const aceleracaoEl = document.getElementById('aceleracao');
+    const velocidadeEl = document.getElementById('velocidade');
+    const textoResumoEl = document.getElementById('textoResumo');
+
+    const cardForca = document.getElementById('cardForca');
+    const cardAltura = document.getElementById('cardAltura');
+    const cardDistancia = document.getElementById('cardDistancia');
+    const cardTempo = document.getElementById('cardTempo');
+    const cardEjecao = document.getElementById('cardEjecao');
+    const cardStatus = document.getElementById('cardStatus');
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const g = 9.8;
+    const base = {
+      massaVazia: 0.15,
+      volumeGarrafa: 2.0,
+      aguaPercentual: 40,
+      pressaoPSI: 40,
+      angulo: 45,
+      tempoEjecao: 0.55
+    };
+
+    let params = null;
+    let rocketState = null;
+    let animationId = null;
+    let lastTime = 0;
+    let simulatedPath = [];
+    let predictedPath = [];
+    let scaleX = 10;
+    let scaleY = 10;
+
+    function fmt(v, n = 2) {
+      return Number(v).toFixed(n).replace('.', ',');
     }
 
-    function atualizarTudo() {
-      const massaVazia = Number(document.getElementById("massaVazia").value);
-      const volumeGarrafa = Number(document.getElementById("volumeGarrafa").value);
-      const aguaPercentual = Number(document.getElementById("aguaPercentual").value);
-      const pressaoPSI = Number(document.getElementById("pressaoPSI").value);
-
-      if (
-        massaVazia <= 0 ||
-        volumeGarrafa <= 0 ||
-        aguaPercentual <= 0 ||
-        aguaPercentual > 60 ||
-        pressaoPSI <= 0 ||
-        pressaoPSI > 50
-      ) {
-        document.getElementById("resultado").innerHTML = `
-          <h3>Atenção</h3>
-          <p>Use valores válidos. Para aula, mantenha a pressão até 50 PSI e a água até 50%.</p>
-        `;
-        return;
-      }
-
-      const aguaLitros = volumeGarrafa * (aguaPercentual / 100);
-      const massaAgua = aguaLitros;
-      const massaTotal = massaVazia + massaAgua;
-
-      const aguaBaseLitros = volumeBase * (aguaPercentualBase / 100);
-      const massaTotalBase = massaVaziaBase + aguaBaseLitros;
-
-      const fatorMassa = massaTotalBase / massaTotal;
-      const fatorPressao = pressaoPSI / pressaoBasePSI;
-
-      const fatorGeral = fatorMassa * fatorPressao;
-
-      const aceleracao = aceleracaoBase * fatorGeral;
-      const velocidade = velocidadeBase * Math.sqrt(fatorGeral);
-      const tempo = tempoBase * Math.sqrt(fatorGeral);
-
-      const pressaoBar = pressaoPSI * 0.0689476;
-
-      document.getElementById("pressaoBar").value = numeroBR(pressaoBar, 2) + " bar";
-      document.getElementById("aguaLitros").value = numeroBR(aguaLitros, 3) + " L";
-      document.getElementById("massaAgua").value = numeroBR(massaAgua, 3) + " kg";
-      document.getElementById("massaTotal").value = numeroBR(massaTotal, 3) + " kg";
-      document.getElementById("aceleracao").value = numeroBR(aceleracao, 2) + " m/s²";
-      document.getElementById("velocidade").value = numeroBR(velocidade, 2) + " m/s";
-      document.getElementById("tempo").value = numeroBR(tempo, 2) + " s";
-
-      calcular();
+    function lerEntradas() {
+      return {
+        massaVazia: Math.max(0.05, Number(massaVaziaEl.value)),
+        volumeGarrafa: Math.max(0.5, Number(volumeGarrafaEl.value)),
+        aguaPercentual: Math.min(50, Math.max(10, Number(aguaPercentualEl.value))),
+        pressaoPSI: Math.min(50, Math.max(10, Number(pressaoPSIEl.value))),
+        angulo: Math.min(80, Math.max(10, Number(anguloEl.value))),
+        tempoEjecao: Math.min(1.5, Math.max(0.2, Number(tempoEjecaoEl.value)))
+      };
     }
 
-    function calcular() {
-      const massaVazia = Number(document.getElementById("massaVazia").value);
-      const volumeGarrafa = Number(document.getElementById("volumeGarrafa").value);
-      const aguaPercentual = Number(document.getElementById("aguaPercentual").value);
-      const pressaoPSI = Number(document.getElementById("pressaoPSI").value);
-      const angulo = Number(document.getElementById("angulo").value);
+    function calcularParametros() {
+      const e = lerEntradas();
 
-      if (
-        massaVazia <= 0 ||
-        volumeGarrafa <= 0 ||
-        aguaPercentual <= 0 ||
-        aguaPercentual > 60 ||
-        pressaoPSI <= 0 ||
-        pressaoPSI > 50 ||
-        angulo < 0 ||
-        angulo > 90
-      ) {
-        document.getElementById("resultado").innerHTML = `
-          <h3>Atenção</h3>
-          <p>Preencha valores válidos. Pressão máxima neste modelo: 50 PSI. Ângulo: 0° a 90°.</p>
-        `;
-        return;
-      }
-
-      const aguaLitros = volumeGarrafa * (aguaPercentual / 100);
+      const aguaLitros = e.volumeGarrafa * (e.aguaPercentual / 100);
       const massaAgua = aguaLitros;
-      const massaTotal = massaVazia + massaAgua;
+      const massaTotal = e.massaVazia + massaAgua;
 
-      const aguaBaseLitros = volumeBase * (aguaPercentualBase / 100);
-      const massaTotalBase = massaVaziaBase + aguaBaseLitros;
+      const massaBaseAgua = base.volumeGarrafa * (base.aguaPercentual / 100);
+      const massaBaseTotal = base.massaVazia + massaBaseAgua;
 
-      const fatorMassa = massaTotalBase / massaTotal;
-      const fatorPressao = pressaoPSI / pressaoBasePSI;
-      const fatorGeral = fatorMassa * fatorPressao;
+      const fatorMassa = massaBaseTotal / massaTotal;
+      const fatorPressao = e.pressaoPSI / base.pressaoPSI;
+      const fatorAgua = 1 - Math.abs(e.aguaPercentual - 35) / 55;
+      const fatorGeral = fatorMassa * fatorPressao * fatorAgua;
 
-      const aceleracao = aceleracaoBase * fatorGeral;
-      const velocidade = velocidadeBase * Math.sqrt(fatorGeral);
-      const tempo = tempoBase * Math.sqrt(fatorGeral);
+      const aceleracao = 50 * fatorGeral;
+      const velocidadeSaida = Math.max(6, 18 * Math.sqrt(Math.max(0.15, fatorGeral)));
       const forca = massaTotal * aceleracao;
+      const angRad = e.angulo * Math.PI / 180;
 
-      const altura = (velocidade * velocidade) / (2 * gravidade);
-      const anguloRad = (2 * angulo) * Math.PI / 180;
-      const distancia = (velocidade * velocidade * Math.sin(anguloRad)) / gravidade;
-      const alturaTempo = (gravidade * tempo * tempo) / 8;
+      const v0x = velocidadeSaida * Math.cos(angRad);
+      const v0y = velocidadeSaida * Math.sin(angRad);
 
-      let interpretacao = "";
-      if (pressaoPSI < pressaoBasePSI) {
-        interpretacao = "A pressão está abaixo do padrão. O foguete tende a atingir menor altura e menor distância.";
-      } else if (pressaoPSI > pressaoBasePSI) {
-        interpretacao = "A pressão está acima do padrão. O foguete tende a atingir maior altura, mas exige mais cuidado de segurança.";
-      } else {
-        interpretacao = "A pressão está no padrão didático de 40 PSI.";
-      }
+      const tempoVooEstimado = (2 * v0y) / g;
+      const alturaMax = (v0y * v0y) / (2 * g);
+      const distancia = (velocidadeSaida * velocidadeSaida * Math.sin(2 * angRad)) / g;
+      const pressaoBar = e.pressaoPSI * 0.0689476;
 
-      document.getElementById("resultado").innerHTML = `
-        <h3>Resultado dos cálculos</h3>
+      params = {
+        ...e, aguaLitros, massaAgua, massaTotal, fatorGeral, aceleracao,
+        velocidadeSaida, forca, v0x, v0y, alturaMax, distancia,
+        tempoVooEstimado, pressaoBar, angRad
+      };
 
-        <div class="resultado-grid">
-          <div class="mini-resultado">
-            <strong>Pressão</strong>
-            <span>${numeroBR(pressaoPSI, 0)} PSI</span>
-          </div>
+      preencherTela();
+      montarTrajetoriaPrevista();
+      resetScene();
+    }
 
-          <div class="mini-resultado">
-            <strong>Água</strong>
-            <span>${numeroBR(aguaLitros, 3)} L</span>
-          </div>
+    function preencherTela() {
+      pressaoBarEl.value = fmt(params.pressaoBar, 2) + ' bar';
+      aguaLitrosEl.value = fmt(params.aguaLitros, 3) + ' L';
+      massaAguaEl.value = fmt(params.massaAgua, 3) + ' kg';
+      massaTotalEl.value = fmt(params.massaTotal, 3) + ' kg';
+      aceleracaoEl.value = fmt(params.aceleracao, 2) + ' m/s²';
+      velocidadeEl.value = fmt(params.velocidadeSaida, 2) + ' m/s';
 
-          <div class="mini-resultado">
-            <strong>Massa total</strong>
-            <span>${numeroBR(massaTotal, 3)} kg</span>
-          </div>
+      cardForca.textContent = fmt(params.forca, 2) + ' N';
+      cardAltura.textContent = fmt(params.alturaMax, 2) + ' m';
+      cardDistancia.textContent = fmt(params.distancia, 2) + ' m';
+      cardTempo.textContent = fmt(params.tempoVooEstimado, 2) + ' s';
+      cardEjecao.textContent = fmt(params.tempoEjecao, 2) + ' s';
 
-          <div class="mini-resultado">
-            <strong>Aceleração</strong>
-            <span>${numeroBR(aceleracao, 2)} m/s²</span>
-          </div>
-
-          <div class="mini-resultado">
-            <strong>Força média</strong>
-            <span>${numeroBR(forca, 2)} N</span>
-          </div>
-
-          <div class="mini-resultado">
-            <strong>Velocidade</strong>
-            <span>${numeroBR(velocidade, 2)} m/s</span>
-          </div>
-
-          <div class="mini-resultado">
-            <strong>Altura máxima</strong>
-            <span>${numeroBR(altura, 2)} m</span>
-          </div>
-
-          <div class="mini-resultado">
-            <strong>Distância</strong>
-            <span>${numeroBR(distancia, 2)} m</span>
-          </div>
-
-          <div class="mini-resultado">
-            <strong>Tempo de voo</strong>
-            <span>${numeroBR(tempo, 2)} s</span>
-          </div>
-
-          <div class="mini-resultado">
-            <strong>Altura pelo tempo</strong>
-            <span>${numeroBR(alturaTempo, 2)} m</span>
-          </div>
-        </div>
-
-        <p style="margin-top:15px;">
-          <strong>Interpretação:</strong> ${interpretacao}
-        </p>
-
-        <p>
-          Com esses dados, o foguete teria massa total inicial aproximada de
-          <strong>${numeroBR(massaTotal, 3)} kg</strong>, força média de
-          <strong>${numeroBR(forca, 2)} N</strong>, altura máxima estimada de
-          <strong>${numeroBR(altura, 2)} m</strong> e distância aproximada de
-          <strong>${numeroBR(distancia, 2)} m</strong>.
-        </p>
+      textoResumoEl.innerHTML = `
+        <p><strong>Massa total:</strong> ${fmt(params.massaTotal, 3)} kg</p>
+        <p><strong>Força média estimada:</strong> ${fmt(params.forca, 2)} N</p>
+        <p><strong>Velocidade de saída:</strong> ${fmt(params.velocidadeSaida, 2)} m/s</p>
+        <p><strong>Altura máxima estimada:</strong> ${fmt(params.alturaMax, 2)} m</p>
+        <p><strong>Distância horizontal estimada:</strong> ${fmt(params.distancia, 2)} m</p>
+        <p><strong>Interpretação:</strong> ${gerarInterpretacao()}</p>
       `;
     }
 
-    function dadosPadrao() {
-      document.getElementById("massaVazia").value = massaVaziaBase;
-      document.getElementById("volumeGarrafa").value = volumeBase;
-      document.getElementById("aguaPercentual").value = aguaPercentualBase;
-      document.getElementById("pressaoPSI").value = pressaoBasePSI;
-      document.getElementById("angulo").value = anguloBase;
-      atualizarTudo();
+    function gerarInterpretacao() {
+      let texto = '';
+      if (params.pressaoPSI > 40) texto += 'Com pressão maior, o foguete tende a sair com mais energia. ';
+      if (params.pressaoPSI < 40) texto += 'Com pressão menor, o alcance tende a diminuir. ';
+      if (params.massaTotal > 1.0) texto += 'Como a massa total está alta, o foguete fica mais pesado. ';
+      if (params.aguaPercentual >= 30 && params.aguaPercentual <= 40) texto += 'A quantidade de água está em uma faixa boa para lançamento escolar. ';
+      if (texto === '') texto = 'O foguete está com valores próximos do padrão didático.';
+      return texto;
     }
 
-    window.onload = atualizarTudo;
-  </script>
+    function montarTrajetoriaPrevista() {
+      predictedPath = [];
+      const total = Math.max(0.2, params.tempoVooEstimado);
+      for (let t = 0; t <= total; t += total / 120) {
+        const x = params.v0x * t;
+        const y = params.v0y * t - 0.5 * g * t * t;
+        if (y >= 0) predictedPath.push({x, y});
+      }
+      updateScale();
+    }
 
+    function updateScale() {
+      const margemEsq = 90;
+      const margemDir = 80;
+      const margemBase = 85;
+      const margemTopo = 60;
+      const areaW = canvas.width - margemEsq - margemDir;
+      const areaH = canvas.height - margemBase - margemTopo;
+      const maxX = Math.max(10, params.distancia * 1.15);
+      const maxY = Math.max(8, params.alturaMax * 1.35);
+      scaleX = areaW / maxX;
+      scaleY = areaH / maxY;
+    }
+
+    function worldToCanvas(x, y) {
+      const ox = 90;
+      const oy = canvas.height - 75;
+      return { x: ox + x * scaleX, y: oy - y * scaleY };
+    }
+
+    function resetScene() {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+      simulatedPath = [];
+      rocketState = {
+        x: 0, y: 0, vx: 0, vy: 0, t: 0,
+        finished: false, launched: false
+      };
+      cardStatus.textContent = 'Pronto';
+      drawScene();
+    }
+
+    function iniciarSimulacao() {
+      cancelAnimationFrame(animationId);
+      simulatedPath = [];
+      rocketState = {
+        x: 0, y: 0, vx: 0, vy: 0, t: 0,
+        finished: false, launched: true
+      };
+      cardStatus.textContent = 'Em voo';
+      lastTime = performance.now();
+      animationId = requestAnimationFrame(loop);
+    }
+
+    function loop(timestamp) {
+      const dt = Math.min(0.035, (timestamp - lastTime) / 1000);
+      lastTime = timestamp;
+      updatePhysics(dt);
+      drawScene();
+      if (!rocketState.finished) {
+        animationId = requestAnimationFrame(loop);
+      } else {
+        cardStatus.textContent = 'Finalizado';
+      }
+    }
+
+    function updatePhysics(dt) {
+      if (!rocketState.launched || rocketState.finished) return;
+      rocketState.t += dt;
+
+      if (rocketState.t <= params.tempoEjecao) {
+        const progress = rocketState.t / params.tempoEjecao;
+        const thrustNow = params.aceleracao * (1 - 0.35 * progress);
+        rocketState.vx += Math.cos(params.angRad) * thrustNow * dt;
+        rocketState.vy += Math.sin(params.angRad) * thrustNow * dt;
+        rocketState.vy -= g * dt * 0.28;
+      } else if (rocketState.t <= params.tempoEjecao + 0.02) {
+        rocketState.vx += params.v0x * 0.22;
+        rocketState.vy += params.v0y * 0.22;
+      } else {
+        rocketState.vy -= g * dt;
+      }
+
+      rocketState.x += rocketState.vx * dt;
+      rocketState.y += rocketState.vy * dt;
+
+      if (rocketState.y < 0) {
+        rocketState.y = 0;
+        rocketState.finished = true;
+      }
+
+      simulatedPath.push({x: rocketState.x, y: rocketState.y});
+    }
+
+    function drawScene() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBackground();
+      drawAxes();
+      drawLauncher();
+      drawPredictedPath();
+      drawSimulatedPath();
+      drawRocket();
+      drawInfoOverlay();
+    }
+
+    function drawBackground() {
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(253,224,71,0.95)';
+      ctx.arc(canvas.width - 130, 95, 42, 0, Math.PI * 2);
+      ctx.fill();
+      drawCloud(160, 95, 1.0);
+      drawCloud(380, 75, 0.8);
+      drawCloud(820, 130, 1.1);
+      ctx.fillStyle = '#65a30d';
+      ctx.fillRect(0, canvas.height - 75, canvas.width, 75);
+      ctx.fillStyle = '#3f6212';
+      for (let i = 0; i < canvas.width; i += 28) {
+        ctx.fillRect(i, canvas.height - 74, 15, 12);
+      }
+    }
+
+    function drawCloud(x, y, s) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(s, s);
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.beginPath();
+      ctx.arc(0, 0, 24, 0, Math.PI * 2);
+      ctx.arc(26, -8, 28, 0, Math.PI * 2);
+      ctx.arc(55, 0, 24, 0, Math.PI * 2);
+      ctx.arc(28, 10, 24, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawAxes() {
+      ctx.strokeStyle = '#1e3a8a';
+      ctx.lineWidth = 2;
+      const origin = worldToCanvas(0, 0);
+
+      ctx.beginPath();
+      ctx.moveTo(origin.x, origin.y);
+      ctx.lineTo(canvas.width - 50, origin.y);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(origin.x, origin.y);
+      ctx.lineTo(origin.x, 30);
+      ctx.stroke();
+
+      ctx.fillStyle = '#1e3a8a';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText('Distância (m)', canvas.width / 2 - 40, canvas.height - 20);
+      ctx.save();
+      ctx.translate(28, canvas.height / 2 + 30);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('Altura (m)', 0, 0);
+      ctx.restore();
+
+      const maxXMeters = Math.max(10, params.distancia * 1.15);
+      const stepX = niceStep(maxXMeters / 8);
+      for (let x = 0; x <= maxXMeters; x += stepX) {
+        const p = worldToCanvas(x, 0);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x, p.y + 8);
+        ctx.stroke();
+        ctx.fillText(Math.round(x), p.x - 8, p.y + 24);
+      }
+
+      const maxYMeters = Math.max(8, params.alturaMax * 1.35);
+      const stepY = niceStep(maxYMeters / 6);
+      for (let y = 0; y <= maxYMeters; y += stepY) {
+        const p = worldToCanvas(0, y);
+        ctx.beginPath();
+        ctx.moveTo(p.x - 8, p.y);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        if (y > 0) ctx.fillText(Math.round(y), p.x - 36, p.y + 4);
+      }
+    }
+
+    function niceStep(raw) {
+      if (raw <= 1) return 1;
+      if (raw <= 2) return 2;
+      if (raw <= 5) return 5;
+      if (raw <= 10) return 10;
+      return Math.ceil(raw / 10) * 10;
+    }
+
+    function drawLauncher() {
+      const origin = worldToCanvas(0, 0);
+      ctx.save();
+      ctx.translate(origin.x, origin.y);
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(-10, 0);
+      ctx.lineTo(55, -55);
+      ctx.stroke();
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(-18, 0);
+      ctx.lineTo(18, 0);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawPredictedPath() {
+      if (predictedPath.length < 2) return;
+      ctx.save();
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([7, 7]);
+      ctx.beginPath();
+      predictedPath.forEach((pt, i) => {
+        const p = worldToCanvas(pt.x, pt.y);
+        if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawSimulatedPath() {
+      if (simulatedPath.length < 2) return;
+      ctx.save();
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      simulatedPath.forEach((pt, i) => {
+        const p = worldToCanvas(pt.x, pt.y);
+        if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawRocket() {
+      let x = rocketState.x;
+      let y = rocketState.y;
+      let angle = params.angRad;
+      if (rocketState.launched && !rocketState.finished) {
+        angle = Math.atan2(rocketState.vy, rocketState.vx);
+      }
+      const p = worldToCanvas(x, y);
+
+      ctx.save();
+      ctx.translate(p.x + 16, p.y - 18);
+      ctx.rotate(-angle + Math.PI / 2);
+
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.moveTo(-22, 32);
+      ctx.lineTo(-36, 58);
+      ctx.lineTo(-15, 52);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(22, 32);
+      ctx.lineTo(36, 58);
+      ctx.lineTo(15, 52);
+      ctx.fill();
+
+      const grd = ctx.createLinearGradient(0, -50, 0, 50);
+      grd.addColorStop(0, '#60a5fa');
+      grd.addColorStop(1, '#1d4ed8');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.moveTo(0, -55);
+      ctx.quadraticCurveTo(24, -28, 22, 22);
+      ctx.lineTo(22, 48);
+      ctx.lineTo(-22, 48);
+      ctx.lineTo(-22, 22);
+      ctx.quadraticCurveTo(-24, -28, 0, -55);
+      ctx.fill();
+
+      ctx.fillStyle = '#e2e8f0';
+      ctx.beginPath();
+      ctx.moveTo(0, -62);
+      ctx.lineTo(12, -42);
+      ctx.lineTo(-12, -42);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(0, -12, 11, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#60a5fa';
+      ctx.beginPath();
+      ctx.arc(0, -12, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 12px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('PET', 0, 16);
+
+      if (rocketState.launched && rocketState.t <= params.tempoEjecao && !rocketState.finished) {
+        const flame = 28 + 18 * Math.random();
+        ctx.fillStyle = '#fb923c';
+        ctx.beginPath();
+        ctx.moveTo(-10, 50);
+        ctx.quadraticCurveTo(0, 50 + flame, 10, 50);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#fde047';
+        ctx.beginPath();
+        ctx.moveTo(-6, 50);
+        ctx.quadraticCurveTo(0, 44 + flame, 6, 50);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(125,211,252,0.75)';
+        ctx.lineWidth = 3;
+        for (let i = 0; i < 5; i++) {
+          ctx.beginPath();
+          ctx.moveTo((Math.random() - 0.5) * 10, 55);
+          ctx.lineTo((Math.random() - 0.5) * 25, 70 + Math.random() * 28);
+          ctx.stroke();
+        }
+      }
+
+      ctx.restore();
+    }
+
+    function drawInfoOverlay() {
+      ctx.fillStyle = 'rgba(15,23,42,0.82)';
+      ctx.fillRect(canvas.width - 280, 20, 240, 118);
+
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 15px Arial';
+      ctx.fillText('Resumo da simulação', canvas.width - 255, 45);
+
+      ctx.font = '14px Arial';
+      ctx.fillText('Pressão: ' + fmt(params.pressaoPSI, 0) + ' PSI', canvas.width - 255, 68);
+      ctx.fillText('Água: ' + fmt(params.aguaLitros, 3) + ' L', canvas.width - 255, 88);
+      ctx.fillText('Velocidade: ' + fmt(params.velocidadeSaida, 2) + ' m/s', canvas.width - 255, 108);
+      ctx.fillText('Ângulo: ' + fmt(params.angulo, 0) + '°', canvas.width - 255, 128);
+
+      if (!rocketState.launched) return;
+
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      ctx.fillRect(18, 18, 205, 82);
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText('Dados em tempo real', 30, 40);
+      ctx.font = '13px Arial';
+      ctx.fillText('t = ' + fmt(rocketState.t, 2) + ' s', 30, 60);
+      ctx.fillText('x = ' + fmt(rocketState.x, 2) + ' m', 30, 78);
+      ctx.fillText('y = ' + fmt(rocketState.y, 2) + ' m', 120, 78);
+      ctx.fillText('vx = ' + fmt(rocketState.vx, 2) + ' m/s', 30, 96);
+      ctx.fillText('vy = ' + fmt(rocketState.vy, 2) + ' m/s', 120, 96);
+    }
+
+    function aplicarPadrao() {
+      massaVaziaEl.value = base.massaVazia;
+      volumeGarrafaEl.value = base.volumeGarrafa;
+      aguaPercentualEl.value = base.aguaPercentual;
+      pressaoPSIEl.value = base.pressaoPSI;
+      anguloEl.value = base.angulo;
+      tempoEjecaoEl.value = base.tempoEjecao;
+      calcularParametros();
+    }
+
+    [
+      massaVaziaEl, volumeGarrafaEl, aguaPercentualEl,
+      pressaoPSIEl, anguloEl, tempoEjecaoEl
+    ].forEach(el => el.addEventListener('input', calcularParametros));
+
+    document.getElementById('btnPadrao').addEventListener('click', aplicarPadrao);
+    document.getElementById('btnReset').addEventListener('click', resetScene);
+    document.getElementById('btnSimular').addEventListener('click', iniciarSimulacao);
+
+    aplicarPadrao();
+  </script>
 </body>
 </html>
