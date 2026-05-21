@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Física do Foguete de PET</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #020617, #1e3a8a, #0284c7);
+      color: #1e293b;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1150px;
+      margin: auto;
+      background: #f8fafc;
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 25px 55px rgba(0, 0, 0, 0.35);
+    }
+
+    header {
+      text-align: center;
+      padding: 28px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      color: white;
+      margin-bottom: 25px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 18px;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 8px 15px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.22);
+      font-weight: bold;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+    }
+
+    .rocket-area {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 280px;
+      background: radial-gradient(circle, #dbeafe, #eff6ff);
+      border-radius: 20px;
+      margin-bottom: 25px;
+      position: relative;
+      overflow: hidden;
+      border: 2px dashed #93c5fd;
+    }
+
+    .linha-altura {
+      position: absolute;
+      right: 40px;
+      top: 30px;
+      bottom: 30px;
+      width: 4px;
+      background: #1d4ed8;
+      border-radius: 10px;
+    }
+
+    .linha-altura::before {
+      content: "Altura";
+      position: absolute;
+      right: 12px;
+      top: 45%;
+      background: #1d4ed8;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .linha-distancia {
+      position: absolute;
+      left: 80px;
+      right: 80px;
+      bottom: 28px;
+      height: 4px;
+      background: #16a34a;
+      border-radius: 10px;
+    }
+
+    .linha-distancia::before {
+      content: "Distância horizontal";
+      position: absolute;
+      left: 38%;
+      bottom: 12px;
+      background: #16a34a;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .rocket {
+      width: 90px;
+      height: 180px;
+      background: linear-gradient(#60a5fa, #2563eb);
+      border-radius: 50% 50% 12px 12px;
+      position: relative;
+      animation: subir 2s infinite alternate ease-in-out;
+      z-index: 2;
+      box-shadow: 0 15px 25px rgba(37, 99, 235, 0.35);
+    }
+
+    .rocket::before {
+      content: "";
+      position: absolute;
+      top: 35px;
+      left: 25px;
+      width: 40px;
+      height: 40px;
+      background: #bfdbfe;
+      border-radius: 50%;
+      border: 4px solid white;
+    }
+
+    .rocket::after {
+      content: "";
+      position: absolute;
+      bottom: -58px;
+      left: 22px;
+      width: 45px;
+      height: 75px;
+      background: linear-gradient(#f97316, #facc15, transparent);
+      border-radius: 50%;
+      animation: fogo 0.28s infinite alternate;
+    }
+
+    .asa-esq, .asa-dir {
+      position: absolute;
+      bottom: 10px;
+      width: 35px;
+      height: 60px;
+      background: #ef4444;
+    }
+
+    .asa-esq {
+      left: -30px;
+      border-radius: 20px 0 0 20px;
+    }
+
+    .asa-dir {
+      right: -30px;
+      border-radius: 0 20px 20px 0;
+    }
+
+    @keyframes subir {
+      from { transform: translateY(28px); }
+      to { transform: translateY(-28px); }
+    }
+
+    @keyframes fogo {
+      from { transform: scaleY(0.8); opacity: 0.75; }
+      to { transform: scaleY(1.25); opacity: 1; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+      border-left: 7px solid #2563eb;
+    }
+
+    .card h2 {
+      color: #1d4ed8;
+      margin-bottom: 12px;
+      font-size: 23px;
+    }
+
+    .card p {
+      line-height: 1.6;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .formula {
+      background: #e0f2fe;
+      color: #075985;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 21px;
+      font-weight: bold;
+      text-align: center;
+      margin: 12px 0;
+      border: 1px solid #7dd3fc;
+    }
+
+    .calculadora {
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
+      margin-bottom: 25px;
+      border-top: 8px solid #0ea5e9;
+    }
+
+    .calculadora h2 {
+      color: #1d4ed8;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .calculadora .subtitulo {
+      text-align: center;
+      color: #475569;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      color: #334155;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid #cbd5e1;
+      font-size: 16px;
+      background: #f8fafc;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #2563eb;
+      background: #ffffff;
+    }
+
+    .botoes {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    .btn-verde {
+      background: #16a34a;
+    }
+
+    .btn-verde:hover {
+      background: #15803d;
+    }
+
+    .btn-cinza {
+      background: #475569;
+    }
+
+    .btn-cinza:hover {
+      background: #334155;
+    }
+
+    .resultado {
+      background: #dcfce7;
+      border-left: 7px solid #16a34a;
+      padding: 20px;
+      border-radius: 16px;
+      margin-top: 22px;
+    }
+
+    .resultado h3 {
+      color: #166534;
+      margin-bottom: 10px;
+    }
+
+    .resultado p {
+      font-size: 18px;
+      margin: 8px 0;
+    }
+
+    .resultado-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .mini-resultado {
+      background: white;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #bbf7d0;
+      text-align: center;
+    }
+
+    .mini-resultado strong {
+      display: block;
+      color: #166534;
+      margin-bottom: 6px;
+    }
+
+    .mini-resultado span {
+      font-size: 22px;
+      font-weight: bold;
+      color: #0f172a;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-top: 16px;
+      box-shadow: 0 5px 14px rgba(15, 23, 42, 0.08);
+    }
+
+    th {
+      background: #2563eb;
+      color: white;
+      padding: 14px;
+      font-size: 16px;
+    }
+
+    td {
+      padding: 13px;
+      border-bottom: 1px solid #cbd5e1;
+      text-align: center;
+    }
+
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    .atividade {
+      background: #fff7ed;
+      border-left-color: #f97316;
+    }
+
+    .atividade ol {
+      margin-left: 22px;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    .alerta {
+      background: #fef3c7;
+      border-left: 7px solid #f59e0b;
+      padding: 18px;
+      border-radius: 16px;
+      margin-top: 25px;
+      line-height: 1.6;
+    }
+
+    .observacao {
+      background: #e0f2fe;
+      border-left: 7px solid #0284c7;
+      padding: 18px;
+      border-radius: 16px;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 25px;
+      padding: 18px;
+      color: #475569;
+      font-weight: bold;
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .container {
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      button {
+        display: none;
+      }
+
+      .rocket-area,
+      .card,
+      .calculadora {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <header>
+      <h1>Física do Foguete de Garrafa PET</h1>
+      <p>Calculando força, altura e distância do lançamento</p>
+      <div class="badge">Modelo padrão: 1 garrafa PET simples</div>
+    </header>
+
+    <div class="rocket-area">
+      <div class="linha-altura"></div>
+      <div class="linha-distancia"></div>
+
+      <div class="rocket">
+        <div class="asa-esq"></div>
+        <div class="asa-dir"></div>
+      </div>
+    </div>
+
+    <section class="grid">
+
+      <div class="card">
+        <h2>3ª Lei de Newton</h2>
+        <p>
+          O foguete sobe porque a água e o ar são empurrados para baixo.
+          Como reação, o foguete recebe uma força para cima.
+        </p>
+        <p><strong>Ação:</strong> água/ar saem para baixo.</p>
+        <p><strong>Reação:</strong> foguete sobe.</p>
+      </div>
+
+      <div class="card">
+        <h2>Força Exercida</h2>
+        <p>A força pode ser calculada usando a 2ª Lei de Newton:</p>
+        <div class="formula">F = m × a</div>
+        <p>
+          F = força em Newtons<br>
+          m = massa em kg<br>
+          a = aceleração em m/s²
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Altura Máxima</h2>
+        <p>Para estimar a altura máxima, usamos:</p>
+        <div class="formula">H = v² ÷ 2g</div>
+        <p>
+          H = altura<br>
+          v = velocidade inicial<br>
+          g = gravidade, aproximadamente 9,8 m/s²
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Distância Horizontal</h2>
+        <p>Quando o foguete é lançado em ângulo:</p>
+        <div class="formula">D = v² × sen(2θ) ÷ g</div>
+        <p>
+          D = distância<br>
+          θ = ângulo de lançamento<br>
+          v = velocidade inicial
+        </p>
+      </div>
+
+    </section>
+
+    <section class="calculadora">
+      <h2>Calculadora do Foguete de PET</h2>
+      <p class="subtitulo">Já vem preenchida com dados aproximados de 1 garrafa PET simples</p>
+
+      <div class="form-grid">
+        <div>
+          <label>Massa do foguete em kg</label>
+          <input type="number" id="massa" value="0.15" step="0.01">
+        </div>
+
+        <div>
+          <label>Aceleração estimada em m/s²</label>
+          <input type="number" id="aceleracao" value="50" step="0.1">
+        </div>
+
+        <div>
+          <label>Velocidade inicial estimada em m/s</label>
+          <input type="number" id="velocidade" value="18" step="0.1">
+        </div>
+
+        <div>
+          <label>Ângulo de lançamento em graus</label>
+          <input type="number" id="angulo" value="45" step="1">
+        </div>
+
+        <div>
+          <label>Tempo total de voo em segundos</label>
+          <input type="number" id="tempo" value="3.6" step="0.1">
+        </div>
+      </div>
+
+      <div class="botoes">
+        <button onclick="calcular()">Calcular</button>
+        <button class="btn-verde" onclick="dadosPadrao()">Usar dados padrão PET</button>
+        <button class="btn-cinza" onclick="window.print()">Imprimir atividade</button>
+      </div>
+
+      <div class="resultado" id="resultado">
+        <h3>Resultado dos cálculos</h3>
+        <p>Os cálculos aparecerão aqui automaticamente.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Dados padrão — Foguete de 1 garrafa PET</h2>
+
+      <p>
+        Este exemplo usa um foguete simples feito com apenas uma garrafa PET.
+        Os valores são estimados para estudo em sala de aula.
+      </p>
+
+      <table>
+        <tr>
+          <th>Grandeza</th>
+          <th>Valor usado</th>
+        </tr>
+
+        <tr>
+          <td>Massa do foguete</td>
+          <td>0,150 kg</td>
+        </tr>
+
+        <tr>
+          <td>Aceleração estimada</td>
+          <td>50 m/s²</td>
+        </tr>
+
+        <tr>
+          <td>Velocidade inicial estimada</td>
+          <td>18 m/s</td>
+        </tr>
+
+        <tr>
+          <td>Ângulo de lançamento</td>
+          <td>45°</td>
+        </tr>
+
+        <tr>
+          <td>Tempo total de voo</td>
+          <td>3,6 s</td>
+        </tr>
+      </table>
+
+      <h2 style="margin-top:22px;">Resultados aproximados</h2>
+
+      <table>
+        <tr>
+          <th>Cálculo</th>
+          <th>Fórmula</th>
+          <th>Resultado aproximado</th>
+        </tr>
+
+        <tr>
+          <td>Força</td>
+          <td>F = m × a</td>
+          <td>7,5 N</td>
+        </tr>
+
+        <tr>
+          <td>Altura máxima</td>
+          <td>H = v² ÷ 2g</td>
+          <td>16,5 m</td>
+        </tr>
+
+        <tr>
+          <td>Distância horizontal</td>
+          <td>D = v² × sen(2θ) ÷ g</td>
+          <td>33,1 m</td>
+        </tr>
+
+        <tr>
+          <td>Altura pelo tempo de voo</td>
+          <td>H = g × t² ÷ 8</td>
+          <td>15,9 m</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="card atividade">
+      <h2>Atividade para os alunos</h2>
+
+      <ol>
+        <li>Qual é a força exercida pelo foguete usando a fórmula F = m × a?</li>
+        <li>Qual foi a altura máxima estimada?</li>
+        <li>Qual foi a distância horizontal estimada?</li>
+        <li>O que acontece com a altura se a velocidade inicial aumentar?</li>
+        <li>Explique com suas palavras a 3ª Lei de Newton no foguete de PET.</li>
+      </ol>
+    </section>
+
+    <section class="observacao">
+      <strong>Observação para o professor:</strong>
+      os valores usados são aproximados e servem para simulação didática.
+      Em uma situação real, a altura e a distância podem variar por causa do vento,
+      massa total, ângulo, resistência do ar e perda de energia.
+    </section>
+
+    <section class="alerta">
+      <strong>Segurança:</strong>
+      esta atividade deve ser feita somente com orientação do professor,
+      em local aberto e com afastamento seguro. Não lançar em direção a pessoas,
+      janelas, veículos, fios elétricos ou objetos frágeis.
+    </section>
+
+    <footer>
+      Atividade de Física — Foguete de PET | Força, Altura e Distância
+    </footer>
+
+  </div>
+
+  <script>
+    function calcular() {
+      const massa = Number(document.getElementById("massa").value);
+      const aceleracao = Number(document.getElementById("aceleracao").value);
+      const velocidade = Number(document.getElementById("velocidade").value);
+      const angulo = Number(document.getElementById("angulo").value);
+      const tempo = Number(document.getElementById("tempo").value);
+
+      const g = 9.8;
+
+      if (
+        massa <= 0 ||
+        aceleracao <= 0 ||
+        velocidade <= 0 ||
+        tempo <= 0 ||
+        angulo < 0 ||
+        angulo > 90
+      ) {
+        document.getElementById("resultado").innerHTML = `
+          <h3>Atenção</h3>
+          <p>Preencha valores válidos. O ângulo deve estar entre 0° e 90°.</p>
+        `;
+        return;
+      }
+
+      const forca = massa * aceleracao;
+      const altura = (velocidade * velocidade) / (2 * g);
+
+      const anguloRad = (2 * angulo) * Math.PI / 180;
+      const distancia = (velocidade * velocidade * Math.sin(anguloRad)) / g;
+
+      const alturaTempo = (g * tempo * tempo) / 8;
+
+      document.getElementById("resultado").innerHTML = `
+        <h3>Resultado dos cálculos</h3>
+
+        <div class="resultado-grid">
+          <div class="mini-resultado">
+            <strong>Força exercida</strong>
+            <span>${forca.toFixed(2)} N</span>
+          </div>
+
+          <div class="mini-resultado">
+            <strong>Altura máxima</strong>
+            <span>${altura.toFixed(2)} m</span>
+          </div>
+
+          <div class="mini-resultado">
+            <strong>Distância horizontal</strong>
+            <span>${distancia.toFixed(2)} m</span>
+          </div>
+
+          <div class="mini-resultado">
+            <strong>Altura pelo tempo</strong>
+            <span>${alturaTempo.toFixed(2)} m</span>
+          </div>
+        </div>
+
+        <p style="margin-top:15px;">
+          <strong>Interpretação:</strong> com esses dados, o foguete teria uma força inicial aproximada de
+          ${forca.toFixed(2)} N, poderia atingir cerca de ${altura.toFixed(2)} m de altura
+          e percorrer aproximadamente ${distancia.toFixed(2)} m na horizontal.
+        </p>
+      `;
+    }
+
+    function dadosPadrao() {
+      document.getElementById("massa").value = 0.15;
+      document.getElementById("aceleracao").value = 50;
+      document.getElementById("velocidade").value = 18;
+      document.getElementById("angulo").value = 45;
+      document.getElementById("tempo").value = 3.6;
+      calcular();
+    }
+
+    window.onload = calcular;
+  </script>
+
+</body>
+</html>
